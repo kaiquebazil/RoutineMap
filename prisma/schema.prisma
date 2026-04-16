@@ -1,187 +1,138 @@
+// prisma/schema.prisma
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/routine_map_app/nextjs_space/node_modules/.prisma/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql" // ou "mysql", "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
   email         String    @unique
-  emailVerified DateTime?
   password      String?
-  image         String?
+  name          String?
   role          String    @default("user")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
+  
   routines      Routine[]
   habits        Habit[]
+  references    Reference[]
   dailyNotes    DailyNote[]
   weeklyReflections WeeklyReflection[]
-  references    Reference[]
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
 }
 
 model Routine {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  description String?  @db.Text
-  color       String   @default("#7C3AED")
-  icon        String   @default("calendar")
-  energyLevel String   @default("medium")
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  description String?
+  color       String    @default("#7C3AED")
+  icon        String    @default("calendar")
+  energyLevel String    @default("medium") // high, medium, low
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks       Task[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId])
 }
 
 model Task {
   id          String    @id @default(cuid())
   title       String
-  description String?   @db.Text
-  timeOfDay   String?   
-  daysOfWeek  String[]  
-  priority    String    @default("medium")
-  isCompleted Boolean   @default(false)
-  completedAt DateTime?
+  description String?
+  timeOfDay   String?
+  daysOfWeek  String[]  // monday, tuesday, etc.
+  priority    String    @default("medium") // high, medium, low
   sortOrder   Int       @default(0)
   routineId   String
-  routine     Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade)
-  completions TaskCompletion[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  @@index([routineId])
+  
+  routine     Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  completions TaskCompletion[]
 }
 
 model TaskCompletion {
-  id          String   @id @default(cuid())
-  taskId      String
-  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  completedAt DateTime @default(now())
-  date        String   
-
+  id        String   @id @default(cuid())
+  taskId    String
+  date      String   // YYYY-MM-DD
+  createdAt DateTime @default(now())
+  
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
   @@unique([taskId, date])
-  @@index([taskId])
-  @@index([date])
 }
 
 model Habit {
-  id          String       @id @default(cuid())
-  name        String
-  color       String       @default("#7C3AED")
-  icon        String       @default("target")
-  sortOrder   Int          @default(0)
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entries     HabitEntry[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  @@index([userId])
+  id        String       @id @default(cuid())
+  name      String
+  color     String       @default("#7C3AED")
+  icon      String       @default("target")
+  sortOrder Int          @default(0)
+  userId    String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries   HabitEntry[]
 }
 
 model HabitEntry {
   id        String   @id @default(cuid())
   habitId   String
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  date      String
-  completed Boolean  @default(true)
+  date      String   // YYYY-MM-DD
   createdAt DateTime @default(now())
-
+  
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  
   @@unique([habitId, date])
-  @@index([habitId])
-  @@index([date])
-}
-
-model DailyNote {
-  id          String   @id @default(cuid())
-  date        String
-  intention   String?  @db.Text
-  todos       String?  @db.Text
-  notes       String?  @db.Text
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([userId, date])
-  @@index([userId])
-  @@index([date])
-}
-
-model WeeklyReflection {
-  id              String   @id @default(cuid())
-  weekStart       String
-  threeWords      String?  @db.Text
-  proudMoments    String?  @db.Text
-  struggles       String?  @db.Text
-  learned         String?  @db.Text
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([userId, weekStart])
-  @@index([userId])
 }
 
 model Reference {
   id          String   @id @default(cuid())
   title       String
-  url         String?  @db.Text
-  description String?  @db.Text
-  category    String   @default("other")
+  url         String?
+  description String?
+  category    String   @default("other") // youtube, website, music, film, book, social, article, other
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  @@index([userId])
-  @@index([category])
+model DailyNote {
+  id         String   @id @default(cuid())
+  date       String   // YYYY-MM-DD
+  intention  String?
+  todos      String?
+  notes      String?
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date])
+}
+
+model WeeklyReflection {
+  id           String   @id @default(cuid())
+  weekStart    String   // YYYY-MM-DD (Monday of the week)
+  threeWords   String?
+  proudMoments String?
+  struggles    String?
+  learned      String?
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, weekStart])
 }
