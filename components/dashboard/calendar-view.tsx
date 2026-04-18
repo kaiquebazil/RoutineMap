@@ -102,7 +102,7 @@ export function CalendarView({ routines }: CalendarViewProps) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <span className="text-2xl">\ud83d\udcc6</span> Calendário
+            <span className="text-2xl">📆</span> Calendário
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Visão mensal das suas tarefas e conclusões</p>
         </div>

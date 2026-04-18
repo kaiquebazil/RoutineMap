@@ -128,7 +128,7 @@ export function HabitTracker() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <span className="text-2xl">\u2705</span> Rastreador de Hábitos
+            <span className="text-2xl">✅</span> Rastreador de Hábitos
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Acompanhe as 4 competências: Listening, Speaking, Reading e Writing</p>
         </div>

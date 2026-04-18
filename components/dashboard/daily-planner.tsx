@@ -90,7 +90,7 @@ export function DailyPlanner() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <span className="text-2xl">\ud83d\udcc5</span> Planejador Diário
+            <span className="text-2xl">📅</span> Planejador Diário
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Organize seu dia com intenções, tarefas e notas</p>
         </div>
@@ -153,7 +153,7 @@ export function DailyPlanner() {
           <textarea
             value={todos}
             onChange={(e) => { setTodos(e.target.value); autoSave('todos', e.target.value); }}
-            placeholder="- Comprar mantimentos\n- Enviar relatório\n- Estudar 1 hora"
+            placeholder={"- Comprar mantimentos\n- Enviar relatório\n- Estudar 1 hora"}
             className="w-full min-h-[120px] bg-muted/30 rounded-lg p-3 text-sm resize-none border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50 font-mono"
           />
         </motion.div>
