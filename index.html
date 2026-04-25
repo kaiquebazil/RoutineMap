@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine Map - Seu mapa para dominar idiomas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .dark { background-color: #030712; color: #f9fafb; }
+        [v-cloak] { display: none; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .dark .glass { background: rgba(3, 7, 18, 0.8); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .card { border-radius: 1rem; border: 1px solid rgba(0,0,0,0.1); background: white; transition: all 0.3s; }
+        .dark .card { background: #111827; border: 1px solid rgba(255,255,255,0.1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .btn-primary { background: linear-gradient(to right, #7c3aed, #9333ea); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.2s; }
+        .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+        input, textarea, select { background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 0.5rem; padding: 0.5rem; width: 100%; }
+        .dark input, .dark textarea, .dark select { border-color: rgba(255,255,255,0.1); color: white; }
+    </style>
+</head>
+<body :class="{ 'dark': isDarkMode }" id="app" v-cloak>
+    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+        
+        <!-- LANDING PAGE -->
+        <div v-if="currentView === 'landing'" class="relative">
+            <nav class="sticky top-0 z-50 glass">
+                <div class="container mx-auto flex h-16 items-center justify-between px-4">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 shadow-md">
+                            <i data-lucide="languages" class="h-5 w-5 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold tracking-tight">Routine Map</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button @click="toggleDarkMode" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                            <i :data-lucide="isDarkMode ? 'sun' : 'moon'" class="h-5 w-5"></i>
+                        </button>
+                        <button @click="currentView = 'dashboard'" class="btn-primary text-sm">Abrir dashboard</button>
+                    </div>
+                </div>
+            </nav>
+
+            <section class="container mx-auto px-4 pt-20 pb-16 text-center">
+                <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 text-sm font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300">
+                    <i data-lucide="sparkles" class="h-3.5 w-3.5"></i> Seu mapa para dominar idiomas
+                </div>
+                <h1 class="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl mb-6">
+                    Planeje, pratique e <span class="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">domine idiomas</span>
+                </h1>
+                <p class="mt-6 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                    Organize suas rotinas de estudo, acompanhe hábitos linguísticos e centralize suas referências em um único painel. Sem cadastro — tudo salvo no seu navegador.
+                </p>
+                <div class="mt-10">
+                    <button @click="currentView = 'dashboard'" class="btn-primary px-8 py-3 text-lg flex items-center gap-2 mx-auto">
+                        Começar agora <i data-lucide="arrow-right" class="h-5 w-5"></i>
+                    </button>
+                </div>
+            </section>
+
+            <section class="container mx-auto px-4 py-16 grid md:grid-cols-3 gap-8">
+                <div v-for="feat in features" class="card p-6">
+                    <div :class="['w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br', feat.color]">
+                        <i :data-lucide="feat.icon" class="text-white h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">{{ feat.title }}</h3>
+                    <p class="text-slate-600 dark:text-slate-400">{{ feat.description }}</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div v-else class="flex flex-col min-h-screen">
+            <header class="sticky top-0 z-50 glass">
+                <div class="max-w-[1200px] mx-auto px-4 h-16 flex items-center justify-between">
+                    <div class="flex items-center gap-3 cursor-pointer" @click="currentView = 'landing'">
+                        <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="languages" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="font-bold text-lg hidden sm:block">Routine Map</span>
+                    </div>
+
+                    <nav class="hidden md:flex items-center gap-1">
+                        <button v-for="item in navItems" 
+                                @click="dashboardTab = item.id"
+                                :class="['px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors', dashboardTab === item.id ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' : 'hover:bg-slate-200 dark:hover:bg-slate-800']">
+                            <i :data-lucide="item.icon" class="w-4 h-4"></i>
+                            {{ item.label }}
+                        </button>
+                    </nav>
+
+                    <div class="flex items-center gap-2">
+                        <button @click="toggleDarkMode" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800">
+                            <i :data-lucide="isDarkMode ? 'sun' : 'moon'" class="h-5 w-5"></i>
+                        </button>
+                        <button @click="resetAllData" class="p-2 rounded-lg hover:bg-red-100 text-red-500" title="Resetar Dados">
+                            <i data-lucide="rotate-ccw" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Mobile Nav -->
+                <div class="md:hidden flex overflow-x-auto px-4 pb-2 gap-2 scrollbar-hide">
+                    <button v-for="item in navItems" 
+                            @click="dashboardTab = item.id"
+                            :class="['px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1 whitespace-nowrap', dashboardTab === item.id ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' : 'bg-slate-100 dark:bg-slate-800']">
+                        <i :data-lucide="item.icon" class="w-3.5 h-3.5"></i>
+                        {{ item.label }}
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-grow max-w-[1200px] mx-auto w-full px-4 py-8">
+                
+                <!-- TAB: ROTINAS -->
+                <div v-if="dashboardTab === 'routines'">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold">Mapa de Rotinas</h1>
+                            <p class="text-slate-500 text-sm">Organize seus estudos por nível de energia</p>
+                        </div>
+                        <button @click="openRoutineModal()" class="btn-primary flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Nova Rotina
+                        </button>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div v-for="routine in routines" :key="routine.id" class="card p-5 border-l-4" :style="{ borderLeftColor: routine.color }">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 rounded-lg" :style="{ backgroundColor: routine.color + '20', color: routine.color }">
+                                        <i :data-lucide="routine.icon" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">{{ routine.title }}</h3>
+                                        <p class="text-xs text-slate-500">{{ routine.description }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button @click="openRoutineModal(routine)" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button @click="deleteRoutine(routine.id)" class="p-1.5 hover:bg-red-50 text-red-500 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <div v-for="task in routine.tasks" :key="task.id" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-900 group">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" :checked="isTaskCompleted(task.id)" @change="toggleTask(task.id)" class="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500">
+                                        <span :class="{'line-through text-slate-400': isTaskCompleted(task.id)}">{{ task.title }}</span>
+                                    </div>
+                                    <div class="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button @click="openTaskModal(routine.id, task)" class="p-1 hover:text-violet-500"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                                        <button @click="deleteTask(task.id)" class="p-1 hover:text-red-500"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button @click="openTaskModal(routine.id)" class="text-sm font-medium text-violet-600 dark:text-violet-400 flex items-center gap-1 hover:underline">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar tarefa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: HOJE -->
+                <div v-if="dashboardTab === 'daily'">
+                    <h1 class="text-2xl font-bold mb-6">Foco de Hoje</h1>
+                    <div class="grid gap-6">
+                        <div v-for="routine in routines" v-if="getTasksForToday(routine).length > 0" class="card p-6">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: routine.color }"></span>
+                                {{ routine.title }}
+                            </h3>
+                            <div class="space-y-3">
+                                <div v-for="task in getTasksForToday(routine)" class="flex items-center gap-4 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <input type="checkbox" :checked="isTaskCompleted(task.id)" @change="toggleTask(task.id)" class="w-6 h-6 rounded-lg border-slate-300 text-violet-600">
+                                    <div class="flex-grow">
+                                        <div class="font-medium" :class="{'line-through text-slate-400': isTaskCompleted(task.id)}">{{ task.title }}</div>
+                                        <div class="text-xs text-slate-500 flex items-center gap-2">
+                                            <i v-if="task.timeOfDay" data-lucide="clock" class="w-3 h-3"></i> {{ task.timeOfDay }}
+                                            <span v-if="task.priority === 'high'" class="text-red-500 font-bold">!!!</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="!routines.some(r => getTasksForToday(r).length > 0)" class="text-center py-20 card">
+                            <i data-lucide="calendar" class="w-12 h-12 mx-auto mb-4 text-slate-300"></i>
+                            <p class="text-slate-500">Nenhuma tarefa agendada para hoje.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: HÁBITOS -->
+                <div v-if="dashboardTab === 'habits'">
+                    <div class="flex items-center justify-between mb-8">
+                        <h1 class="text-2xl font-bold">Rastreador de Hábitos</h1>
+                        <button @click="addHabit" class="btn-primary flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Novo Hábito
+                        </button>
+                    </div>
+                    <div class="card overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-900">
+                                    <th class="p-4 border-b border-slate-100 dark:border-slate-800">Hábito</th>
+                                    <th v-for="day in weekDates" class="p-4 border-b border-slate-100 dark:border-slate-800 text-center text-xs">
+                                        {{ day.label }}<br><span class="text-slate-400">{{ day.date.split('-')[2] }}</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="habit in habits" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                                    <td class="p-4 border-b border-slate-100 dark:border-slate-800 font-medium">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full" :style="{ backgroundColor: habit.color }"></span>
+                                            {{ habit.name }}
+                                        </div>
+                                    </td>
+                                    <td v-for="day in weekDates" class="p-4 border-b border-slate-100 dark:border-slate-800 text-center">
+                                        <button @click="toggleHabit(habit.id, day.date)" 
+                                                :class="['w-8 h-8 rounded-lg border-2 transition-all', isHabitDone(habit, day.date) ? 'bg-violet-500 border-violet-500 text-white' : 'border-slate-200 dark:border-slate-700 hover:border-violet-300']">
+                                            <i v-if="isHabitDone(habit, day.date)" data-lucide="check" class="w-4 h-4 mx-auto"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: REFERÊNCIAS -->
+                <div v-if="dashboardTab === 'references'">
+                    <h1 class="text-2xl font-bold mb-6">Referências & Recursos</h1>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div v-for="ref in references" class="card p-4 flex flex-col h-full">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs uppercase tracking-wider font-bold text-slate-400">{{ ref.category }}</span>
+                                <div class="flex gap-1">
+                                    <button @click="deleteRef(ref.id)" class="text-red-400 hover:text-red-600"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="font-bold mb-1">{{ ref.title }}</h3>
+                            <p class="text-sm text-slate-500 mb-4 flex-grow">{{ ref.description }}</p>
+                            <a v-if="ref.url" :href="ref.url" target="_blank" class="text-sm font-medium text-violet-600 hover:underline flex items-center gap-1">
+                                Acessar <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </div>
+                        <button @click="addReference" class="card p-4 border-dashed border-2 flex flex-col items-center justify-center text-slate-400 hover:text-violet-500 hover:border-violet-500 min-h-[150px]">
+                            <i data-lucide="plus-circle" class="w-8 h-8 mb-2"></i>
+                            <span>Adicionar Referência</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB: STATS -->
+                <div v-if="dashboardTab === 'stats'">
+                    <h1 class="text-2xl font-bold mb-6">Estatísticas</h1>
+                    <div class="grid gap-6 md:grid-cols-3 mb-8">
+                        <div class="card p-6 bg-violet-600 text-white border-none">
+                            <div class="text-violet-200 text-sm font-medium mb-1">Concluídas Hoje</div>
+                            <div class="text-4xl font-bold">{{ stats.completedToday }}</div>
+                        </div>
+                        <div class="card p-6">
+                            <div class="text-slate-500 text-sm font-medium mb-1">Total de Rotinas</div>
+                            <div class="text-4xl font-bold">{{ stats.routines }}</div>
+                        </div>
+                        <div class="card p-6">
+                            <div class="text-slate-500 text-sm font-medium mb-1">Total de Tarefas</div>
+                            <div class="text-4xl font-bold">{{ stats.tasks }}</div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold mb-4">Progresso nos últimos 7 dias</h3>
+                        <canvas id="statsChart" height="100"></canvas>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- MODALS -->
+        <!-- Routine Modal -->
+        <div v-if="modals.routine.show" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="card w-full max-w-md p-6 shadow-2xl">
+                <h2 class="text-xl font-bold mb-4">{{ modals.routine.editId ? 'Editar Rotina' : 'Nova Rotina' }}</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Título</label>
+                        <input v-model="modals.routine.data.title" placeholder="Ex: Estudo Matinal">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Cor</label>
+                        <input type="color" v-model="modals.routine.data.color" class="h-10">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Energia</label>
+                        <select v-model="modals.routine.data.energyLevel">
+                            <option value="high">Alta ⚡</option>
+                            <option value="medium">Média 🟡</option>
+                            <option value="low">Baixa 🔵</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 pt-4">
+                        <button @click="modals.routine.show = false" class="flex-grow py-2 rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-slate-800">Cancelar</button>
+                        <button @click="saveRoutine" class="flex-grow btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Modal -->
+        <div v-if="modals.task.show" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="card w-full max-w-md p-6 shadow-2xl">
+                <h2 class="text-xl font-bold mb-4">{{ modals.task.editId ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Título</label>
+                        <input v-model="modals.task.data.title" placeholder="O que você vai fazer?">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Horário (opcional)</label>
+                        <input type="time" v-model="modals.task.data.timeOfDay">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium mb-1 block">Prioridade</label>
+                        <select v-model="modals.task.data.priority">
+                            <option value="low">Baixa</option>
+                            <option value="medium">Média</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 pt-4">
+                        <button @click="modals.task.show = false" class="flex-grow py-2 rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-slate-800">Cancelar</button>
+                        <button @click="saveTask" class="flex-grow btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, onMounted, watch, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const isDarkMode = ref(localStorage.getItem('theme') === 'dark');
+                const currentView = ref('landing');
+                const dashboardTab = ref('routines');
+                const routines = ref([]);
+                const habits = ref([]);
+                const references = ref([]);
+                const stats = reactive({ completedToday: 0, routines: 0, tasks: 0, last7days: [] });
+                
+                const modals = reactive({
+                    routine: { show: false, editId: null, data: { title: '', color: '#7c3aed', energyLevel: 'medium' } },
+                    task: { show: false, editId: null, routineId: null, data: { title: '', timeOfDay: '', priority: 'medium' } }
+                });
+
+                const features = [
+                    { icon: 'languages', title: 'Rotinas por Idioma', description: 'Organize seus estudos por nível de energia e foco.', color: 'from-violet-500 to-purple-500' },
+                    { icon: 'target', title: 'Hábitos Semanais', description: 'Acompanhe seu progresso visual em uma grade semanal.', color: 'from-blue-500 to-cyan-500' },
+                    { icon: 'bar-chart-3', title: 'Estatísticas', description: 'Visualize seu desempenho e mantenha a consistência.', color: 'from-pink-500 to-rose-500' }
+                ];
+
+                const navItems = [
+                    { id: 'routines', label: 'Rotinas', icon: 'layout-dashboard' },
+                    { id: 'daily', label: 'Hoje', icon: 'calendar' },
+                    { id: 'habits', label: 'Hábitos', icon: 'target' },
+                    { id: 'references', label: 'Referências', icon: 'book-open' },
+                    { id: 'stats', label: 'Stats', icon: 'bar-chart-3' }
+                ];
+
+                const weekDates = ref([]);
+                const updateWeekDates = () => {
+                    const dates = [];
+                    const today = new Date();
+                    const day = today.getDay();
+                    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+                    const monday = new Date(today.setDate(diff));
+                    
+                    const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+                    for(let i=0; i<7; i++) {
+                        const d = new Date(monday);
+                        d.setDate(monday.getDate() + i);
+                        dates.push({ label: labels[i], date: d.toISOString().split('T')[0] });
+                    }
+                    weekDates.value = dates;
+                };
+
+                const toggleDarkMode = () => {
+                    isDarkMode.value = !isDarkMode.value;
+                    localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light');
+                    nextTick(() => lucide.createIcons());
+                };
+
+                const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+                const todayISO = () => new Date().toISOString().split('T')[0];
+
+                const loadData = () => {
+                    const rawRoutines = localStorage.getItem('rm:routines');
+                    const rawHabits = localStorage.getItem('rm:habits');
+                    const rawRefs = localStorage.getItem('rm:references');
+                    
+                    if (!rawRoutines) {
+                        // Inicialização com dados padrão se vazio
+                        routines.value = [
+                            { id: uid(), title: 'Alta Energia ⚡', color: '#10B981', energyLevel: 'high', tasks: [
+                                { id: uid(), title: 'Prática de Speaking', priority: 'high', completions: [] }
+                            ] },
+                            { id: uid(), title: 'Média Energia 🟡', color: '#F59E0B', energyLevel: 'medium', tasks: [
+                                { id: uid(), title: 'Leitura de Artigo', priority: 'medium', completions: [] }
+                            ] }
+                        ];
+                        habits.value = [
+                            { id: uid(), name: 'Listening 🎧', color: '#8B5CF6', entries: [] },
+                            { id: uid(), name: 'Speaking 🗣️', color: '#EC4899', entries: [] }
+                        ];
+                        references.value = [
+                            { id: uid(), title: 'Radio Garden', url: 'https://radio.garden', description: 'Rádios do mundo todo', category: 'website' }
+                        ];
+                        saveAll();
+                    } else {
+                        routines.value = JSON.parse(rawRoutines);
+                        habits.value = JSON.parse(rawHabits || '[]');
+                        references.value = JSON.parse(rawRefs || '[]');
+                    }
+                    updateStats();
+                };
+
+                const saveAll = () => {
+                    localStorage.setItem('rm:routines', JSON.stringify(routines.value));
+                    localStorage.setItem('rm:habits', JSON.stringify(habits.value));
+                    localStorage.setItem('rm:references', JSON.stringify(references.value));
+                    updateStats();
+                };
+
+                const updateStats = () => {
+                    let totalTasks = 0;
+                    let completedToday = 0;
+                    const today = todayISO();
+                    
+                    routines.value.forEach(r => {
+                        totalTasks += r.tasks.length;
+                        r.tasks.forEach(t => {
+                            if (t.completions.some(c => c.date === today)) completedToday++;
+                        });
+                    });
+
+                    stats.routines = routines.value.length;
+                    stats.tasks = totalTasks;
+                    stats.completedToday = completedToday;
+                    
+                    // Mock last 7 days for chart
+                    const last7 = [];
+                    for(let i=6; i>=0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const iso = d.toISOString().split('T')[0];
+                        let count = 0;
+                        routines.value.forEach(r => {
+                            r.tasks.forEach(t => {
+                                if (t.completions.some(c => c.date === iso)) count++;
+                            });
+                        });
+                        last7.push({ date: iso.split('-').slice(1).reverse().join('/'), count });
+                    }
+                    stats.last7days = last7;
+                    
+                    if (dashboardTab.value === 'stats') {
+                        nextTick(renderChart);
+                    }
+                };
+
+                let myChart = null;
+                const renderChart = () => {
+                    const ctx = document.getElementById('statsChart');
+                    if (!ctx) return;
+                    if (myChart) myChart.destroy();
+                    myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: stats.last7days.map(d => d.date),
+                            datasets: [{
+                                label: 'Tarefas Concluídas',
+                                data: stats.last7days.map(d => d.count),
+                                backgroundColor: '#7c3aed',
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                        }
+                    });
+                };
+
+                const toggleTask = (taskId) => {
+                    const today = todayISO();
+                    routines.value.forEach(r => {
+                        const task = r.tasks.find(t => t.id === taskId);
+                        if (task) {
+                            const idx = task.completions.findIndex(c => c.date === today);
+                            if (idx >= 0) task.completions.splice(idx, 1);
+                            else task.completions.push({ id: uid(), date: today });
+                        }
+                    });
+                    saveAll();
+                };
+
+                const isTaskCompleted = (taskId) => {
+                    const today = todayISO();
+                    for(const r of routines.value) {
+                        const task = r.tasks.find(t => t.id === taskId);
+                        if (task && task.completions.some(c => c.date === today)) return true;
+                    }
+                    return false;
+                };
+
+                const getTasksForToday = (routine) => {
+                    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                    const todayName = dayNames[new Date().getDay()];
+                    return routine.tasks.filter(t => !t.daysOfWeek || t.daysOfWeek.includes(todayName));
+                };
+
+                const toggleHabit = (habitId, date) => {
+                    const habit = habits.value.find(h => h.id === habitId);
+                    if (habit) {
+                        const idx = habit.entries.findIndex(e => e.date === date);
+                        if (idx >= 0) habit.entries.splice(idx, 1);
+                        else habit.entries.push({ id: uid(), date, completed: true });
+                        saveAll();
+                    }
+                };
+
+                const isHabitDone = (habit, date) => habit.entries.some(e => e.date === date);
+
+                const openRoutineModal = (routine = null) => {
+                    if (routine) {
+                        modals.routine.editId = routine.id;
+                        modals.routine.data = { ...routine };
+                    } else {
+                        modals.routine.editId = null;
+                        modals.routine.data = { title: '', color: '#7c3aed', energyLevel: 'medium' };
+                    }
+                    modals.routine.show = true;
+                    nextTick(() => lucide.createIcons());
+                };
+
+                const saveRoutine = () => {
+                    if (modals.routine.editId) {
+                        const idx = routines.value.findIndex(r => r.id === modals.routine.editId);
+                        routines.value[idx] = { ...routines.value[idx], ...modals.routine.data };
+                    } else {
+                        routines.value.push({ ...modals.routine.data, id: uid(), tasks: [] });
+                    }
+                    modals.routine.show = false;
+                    saveAll();
+                };
+
+                const deleteRoutine = (id) => {
+                    if (confirm('Excluir esta rotina?')) {
+                        routines.value = routines.value.filter(r => r.id !== id);
+                        saveAll();
+                    }
+                };
+
+                const openTaskModal = (routineId, task = null) => {
+                    modals.task.routineId = routineId;
+                    if (task) {
+                        modals.task.editId = task.id;
+                        modals.task.data = { ...task };
+                    } else {
+                        modals.task.editId = null;
+                        modals.task.data = { title: '', timeOfDay: '', priority: 'medium' };
+                    }
+                    modals.task.show = true;
+                };
+
+                const saveTask = () => {
+                    const routine = routines.value.find(r => r.id === modals.task.routineId);
+                    if (modals.task.editId) {
+                        const idx = routine.tasks.findIndex(t => t.id === modals.task.editId);
+                        routine.tasks[idx] = { ...routine.tasks[idx], ...modals.task.data };
+                    } else {
+                        routine.tasks.push({ ...modals.task.data, id: uid(), completions: [] });
+                    }
+                    modals.task.show = false;
+                    saveAll();
+                };
+
+                const deleteTask = (taskId) => {
+                    routines.value.forEach(r => {
+                        r.tasks = r.tasks.filter(t => t.id !== taskId);
+                    });
+                    saveAll();
+                };
+
+                const addHabit = () => {
+                    const name = prompt('Nome do hábito:');
+                    if (name) {
+                        habits.value.push({ id: uid(), name, color: '#7c3aed', entries: [] });
+                        saveAll();
+                    }
+                };
+
+                const addReference = () => {
+                    const title = prompt('Título:');
+                    const url = prompt('URL:');
+                    if (title) {
+                        references.value.push({ id: uid(), title, url, description: '', category: 'website' });
+                        saveAll();
+                    }
+                };
+
+                const deleteRef = (id) => {
+                    references.value = references.value.filter(r => r.id !== id);
+                    saveAll();
+                };
+
+                const resetAllData = () => {
+                    if (confirm('Isso apagará todos os seus dados. Continuar?')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                };
+
+                onMounted(() => {
+                    loadData();
+                    updateWeekDates();
+                    lucide.createIcons();
+                });
+
+                watch([currentView, dashboardTab, modals], () => {
+                    nextTick(() => lucide.createIcons());
+                });
+
+                watch(dashboardTab, (newTab) => {
+                    if (newTab === 'stats') nextTick(renderChart);
+                });
+
+                return {
+                    isDarkMode, currentView, dashboardTab, routines, habits, references, stats,
+                    features, navItems, weekDates, modals,
+                    toggleDarkMode, toggleTask, isTaskCompleted, getTasksForToday,
+                    toggleHabit, isHabitDone, openRoutineModal, saveRoutine, deleteRoutine,
+                    openTaskModal, saveTask, deleteTask, addHabit, addReference, deleteRef, resetAllData
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
