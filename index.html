@@ -252,7 +252,10 @@
                                             </div>
                                             <div v-else class="w-5 h-5 rounded-md border-2 border-muted-foreground/30"></div>
                                         </div>
-                                        <span :class="['text-sm', isTaskCompleted(task.id) ? 'line-through text-muted-foreground' : '']">{{ task.title }}</span>
+                                        <div class="flex flex-col">
+                                            <span :class="['text-sm font-medium', isTaskCompleted(task.id) ? 'line-through text-muted-foreground' : '']">{{ task.title }}</span>
+                                            <span v-if="task.timeOfDay" class="text-[10px] text-muted-foreground flex items-center gap-1"><i data-lucide="clock" class="w-2.5 h-2.5"></i> {{ task.timeOfDay }}</span>
+                                        </div>
                                     </div>
                                     <div class="flex opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button @click="openTaskModal(routine.id, task)" class="p-1 hover:text-primary"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
@@ -493,9 +496,9 @@
                 });
 
                 const features = [
-                    { icon: 'languages', title: 'Rotinas por Idioma', description: 'Organize seus estudos por nível de energia e foco.', color: 'from-violet-500 to-purple-500' },
-                    { icon: 'target', title: 'Hábitos Semanais', description: 'Acompanhe seu progresso visual em uma grade semanal.', color: 'from-blue-500 to-cyan-500' },
-                    { icon: 'bar-chart-3', title: 'Estatísticas', description: 'Visualize seu desempenho e mantenha a consistência.', color: 'from-pink-500 to-rose-500' }
+                    { icon: 'languages', title: 'Rotinas por Idioma', description: 'Organize seus estudos por nível de energia e foco.', color: 'from-violet-500 to-purple-600' },
+                    { icon: 'target', title: 'Hábitos Semanais', description: 'Acompanhe seu progresso visual em uma grade semanal.', color: 'from-blue-500 to-cyan-600' },
+                    { icon: 'bar-chart-3', title: 'Estatísticas', description: 'Visualize seu desempenho e mantenha a consistência.', color: 'from-pink-500 to-rose-600' }
                 ];
 
                 const navItems = [
@@ -538,25 +541,59 @@
                     const rawRefs = localStorage.getItem('rm:references');
                     
                     if (!rawRoutines) {
-                        // Seed data
+                        // Seed data extraído do sistema original
                         routines.value = [
-                            { id: uid(), title: 'Energia Alta ⚡', description: 'Foco total e prática ativa', color: '#10B981', energyLevel: 'high', icon: 'zap', tasks: [
-                                { id: uid(), title: 'Prática de Speaking (Roleplay)', priority: 'high', completions: [], timeOfDay: '08:00' },
-                                { id: uid(), title: 'Escrita Criativa / Diário', priority: 'medium', completions: [], timeOfDay: '09:00' }
+                            { id: uid(), title: 'High Energy / Energia Alta ⚡', description: 'Atividades que exigem foco total e alta energia.', color: '#10B981', energyLevel: 'high', icon: 'zap', tasks: [
+                                { id: uid(), title: 'Ver vídeos no YouTube com legenda no idioma e traduzir e anotar palavras importantes', priority: 'high', completions: [], timeOfDay: '05:00' },
+                                { id: uid(), title: 'Estudar meus vídeos', priority: 'high', completions: [], timeOfDay: '06:00' },
+                                { id: uid(), title: 'Fazer vídeos', priority: 'high', completions: [], timeOfDay: '07:00' },
+                                { id: uid(), title: 'Roleplay | conversas comuns, emprego e rotina', priority: 'high', completions: [], timeOfDay: '08:00' },
+                                { id: uid(), title: 'Assistir TV Garden', priority: 'medium', completions: [], timeOfDay: '09:00' }
                             ] },
-                            { id: uid(), title: 'Energia Média 🟡', description: 'Imersão e estudo estruturado', color: '#F59E0B', energyLevel: 'medium', icon: 'headphones', tasks: [
-                                { id: uid(), title: 'Leitura de Artigo BBC', priority: 'medium', completions: [], timeOfDay: '14:00' },
-                                { id: uid(), title: 'Estudo de Vocabulário (Anki)', priority: 'high', completions: [], timeOfDay: '15:00' }
+                            { id: uid(), title: 'Medium Energy / Energia Média 🟡', description: 'Atividades de imersão passiva. Boas para momentos de energia moderada.', color: '#F59E0B', energyLevel: 'medium', icon: 'headphones', tasks: [
+                                { id: uid(), title: 'Ouvir áudios, vídeos ou Radio Garden', priority: 'medium', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Escutar vídeos', priority: 'medium', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Jogar em inglês', priority: 'low', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Assistir filmes e séries', priority: 'medium', completions: [], timeOfDay: '' }
+                            ] },
+                            { id: uid(), title: 'Low Energy / Energia Baixa 🔵', description: 'Atividades leves para quando estiver cansado.', color: '#3B82F6', energyLevel: 'low', icon: 'coffee', tasks: [
+                                { id: uid(), title: 'Ler no Quora', priority: 'low', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Escutar Radio Garden', priority: 'low', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Escutar áudios', priority: 'low', completions: [], timeOfDay: '' }
+                            ] },
+                            { id: uid(), title: 'Tarefas Diárias 📝', description: 'Tarefas fixas do planejador diário.', color: '#7C3AED', energyLevel: 'high', icon: 'calendar', tasks: [
+                                { id: uid(), title: 'Assistir 30 min de vídeos em inglês | 5am antes do trabalho', priority: 'high', completions: [], timeOfDay: '05:00' },
+                                { id: uid(), title: 'Estudar meus vídeos', priority: 'high', completions: [], timeOfDay: '06:00' },
+                                { id: uid(), title: 'Escutar vídeos ou Radio Garden indo para o trabalho', priority: 'medium', completions: [], timeOfDay: '07:30' },
+                                { id: uid(), title: 'Fazer arte da conversação antes do trabalho', priority: 'high', completions: [], timeOfDay: '07:00' },
+                                { id: uid(), title: 'Roleplay sobre atendimento no trabalho', priority: 'high', completions: [], timeOfDay: '08:00' }
+                            ] },
+                            { id: uid(), title: 'Role Play 🎭', description: 'Prática de situações reais no idioma.', color: '#EC4899', energyLevel: 'high', icon: 'users', tasks: [
+                                { id: uid(), title: 'Roleplay - Situações no trabalho', priority: 'high', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Roleplay - Situações na universidade', priority: 'high', completions: [], timeOfDay: '' },
+                                { id: uid(), title: 'Roleplay - Conversas do cotidiano', priority: 'medium', completions: [], timeOfDay: '' }
                             ] }
                         ];
                         habits.value = [
                             { id: uid(), name: 'Listening 🎧', color: '#8B5CF6', entries: [] },
                             { id: uid(), name: 'Speaking 🗣️', color: '#EC4899', entries: [] },
-                            { id: uid(), name: 'Reading 📖', color: '#10B981', entries: [] }
+                            { id: uid(), name: 'Reading 📖', color: '#10B981', entries: [] },
+                            { id: uid(), name: 'Writing ✍️', color: '#F59E0B', entries: [] }
                         ];
                         references.value = [
-                            { id: uid(), title: 'Radio Garden', url: 'https://radio.garden', description: 'Rádios do mundo todo para imersão auditiva.', category: 'website' },
-                            { id: uid(), title: 'Easy English', url: 'https://www.youtube.com/@EasyEnglishVideos', description: 'Canal de entrevistas reais em inglês.', category: 'youtube' }
+                            { id: uid(), title: 'Rachel\'s English', url: 'https://www.youtube.com/@rachelsenglish', description: 'Pronúncia americana detalhada.', category: 'youtube' },
+                            { id: uid(), title: 'BBC Learning English', url: 'https://www.bbc.co.uk/learningenglish', description: 'Gramática, vocabulário e notícias.', category: 'website' },
+                            { id: uid(), title: 'Radio Garden', url: 'https://radio.garden', description: 'Rádios do mundo todo ao vivo para imersão.', category: 'radio' },
+                            { id: uid(), title: 'TV Garden', url: 'https://tv.garden', description: 'TVs ao vivo do mundo todo.', category: 'website' },
+                            { id: uid(), title: 'Quora', url: 'https://www.quora.com', description: 'Leitura de perguntas e respostas em inglês.', category: 'website' },
+                            { id: uid(), title: 'The Ellen Show', url: 'https://www.youtube.com/@theellenshow', description: 'Entrevistas em inglês informal.', category: 'youtube' },
+                            { id: uid(), title: 'Peppa Pig (English)', url: 'https://www.youtube.com/@PeppaPigOfficial', description: 'Inglês simples e falado devagar.', category: 'youtube' },
+                            { id: uid(), title: 'Easy English', url: 'https://www.youtube.com/@EasyEnglishVideos', description: 'Entrevistas na rua em inglês simples.', category: 'youtube' },
+                            { id: uid(), title: 'Taylor Swift', url: '', description: 'Letras claras — boa para ouvir e cantar.', category: 'music' },
+                            { id: uid(), title: 'Ed Sheeran', url: '', description: 'Pronúncia britânica e letras melancólicas.', category: 'music' },
+                            { id: uid(), title: 'Friends (série)', url: '', description: 'Clássico para aprender inglês conversacional.', category: 'film' },
+                            { id: uid(), title: 'The Office (US)', url: '', description: 'Inglês de escritório e humor seco.', category: 'film' },
+                            { id: uid(), title: 'Harry Potter (livros)', url: '', description: 'Vocabulário rico e história envolvente.', category: 'book' }
                         ];
                         saveAll();
                     } else {
@@ -617,7 +654,6 @@
                     if (myChart) myChart.destroy();
                     
                     const isDark = isDarkMode.value;
-                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
                     const colorHex = isDark ? '#8b5cf6' : '#7c3aed';
 
                     myChart = new Chart(ctx, {
