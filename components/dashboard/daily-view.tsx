@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle2, Circle, Clock, Zap, Sun, Sunrise, Moon } from 'lucide-react';
 
-const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 function getTimeIcon(time: string | null | undefined) {
@@ -45,7 +45,8 @@ export function DailyView({ routines, onToggleTask }: Props) {
     return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
   });
 
-  const completedCount = sortedTasks?.filter?.((t: any) => (t?.completions?.length ?? 0) > 0)?.length ?? 0;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const completedCount = sortedTasks?.filter?.((t: any) => t?.completions?.some((c: any) => c.date === todayStr))?.length ?? 0;
 
   return (
     <div>
@@ -85,7 +86,7 @@ export function DailyView({ routines, onToggleTask }: Props) {
       ) : (
         <div className="space-y-3">
           {sortedTasks?.map?.((task: any, idx: number) => {
-            const isCompleted = (task?.completions?.length ?? 0) > 0;
+            const isCompleted = task?.completions?.some((c: any) => c.date === todayStr);
             const TimeIcon = getTimeIcon(task?.timeOfDay);
             return (
               <motion.div

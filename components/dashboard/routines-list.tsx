@@ -32,7 +32,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; variant: any }> = {
 };
 
 const DAYS_MAP: Record<string, string> = {
-  mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom',
+  monday: 'Seg', tuesday: 'Ter', wednesday: 'Qua', thursday: 'Qui', friday: 'Sex', saturday: 'Sáb', sunday: 'Dom',
 };
 
 interface Props {
@@ -99,7 +99,8 @@ export function RoutinesList({
         const energy = ENERGY_CONFIG[routine?.energyLevel ?? 'medium'] ?? ENERGY_CONFIG.medium;
         const EnergyIcon = energy?.icon ?? BatteryMedium;
         const tasks = routine?.tasks ?? [];
-        const completedCount = tasks?.filter?.((t: any) => (t?.completions?.length ?? 0) > 0)?.length ?? 0;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const completedCount = tasks?.filter?.((t: any) => t?.completions?.some((c: any) => c.date === todayStr))?.length ?? 0;
         const totalCount = tasks?.length ?? 0;
         const isExpanded = expandedRoutines?.[routine?.id] ?? false;
 
@@ -197,7 +198,7 @@ export function RoutinesList({
                   <div className="px-5 pb-5 border-t border-border/50">
                     <div className="pt-4 space-y-2">
                       {tasks?.map?.((task: any, tIdx: number) => {
-                        const isCompleted = (task?.completions?.length ?? 0) > 0;
+                        const isCompleted = task?.completions?.some((c: any) => c.date === todayStr);
                         const priority = PRIORITY_CONFIG[task?.priority ?? 'medium'] ?? PRIORITY_CONFIG.medium;
                         return (
                           <motion.div

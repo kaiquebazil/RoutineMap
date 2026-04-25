@@ -8,13 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const DAYS = [
-  { id: 'mon', label: 'Seg' },
-  { id: 'tue', label: 'Ter' },
-  { id: 'wed', label: 'Qua' },
-  { id: 'thu', label: 'Qui' },
-  { id: 'fri', label: 'Sex' },
-  { id: 'sat', label: 'Sáb' },
-  { id: 'sun', label: 'Dom' },
+  { id: 'monday', label: 'Seg' },
+  { id: 'tuesday', label: 'Ter' },
+  { id: 'wednesday', label: 'Qua' },
+  { id: 'thursday', label: 'Qui' },
+  { id: 'friday', label: 'Sex' },
+  { id: 'saturday', label: 'Sáb' },
+  { id: 'sunday', label: 'Dom' },
 ];
 
 const PRIORITIES = [
