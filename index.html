@@ -484,6 +484,18 @@
       <button class="nav-item" data-view="daily"><span class="emoji">⭐</span> Atividades Diárias</button>
     </nav>
     <div class="sidebar-footer">
+  <!-- Barra de Progresso de XP -->
+  <div class="xp-progress-container">
+    <div class="xp-progress-header">
+      <span>Nível <span id="levelBadge">1</span></span>
+      <span id="totalXp">0</span> XP
+    </div>
+    <div class="xp-progress-bar">
+      <div class="xp-progress-fill" id="xpProgressBar" style="width: 0%"></div>
+    </div>
+    <div class="xp-progress-text" id="xpProgressText">0 / 120 XP</div>
+  </div>
+  
   <div class="xp-badge">⭐ <span id="totalXp">0</span> XP</div>
   <div class="streak-badge">🔥 <span id="globalStreak">0</span></div>
 </div>
@@ -515,6 +527,27 @@
 
     <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
+      <!-- Card de XP -->
+      <div class="xp-dashboard-card">
+        <div class="xp-dashboard-header">
+          <h3>🎮 Sistema de XP</h3>
+          <div class="xp-level-display" id="levelDisplay">1</div>
+        </div>
+        <div class="xp-stats-row">
+          <div class="xp-stat">
+            <span class="xp-stat-value" id="xpDisplay">0</span>
+            <span class="xp-stat-label">XP Total</span>
+          </div>
+          <div class="xp-stat">
+            <span class="xp-stat-value" id="xpToNextLevel">120</span>
+            <span class="xp-stat-label">Para próximo nível</span>
+          </div>
+        </div>
+        <div class="xp-progress-large">
+          <div class="xp-progress-large-fill" id="xpProgressLarge" style="width: 0%"></div>
+        </div>
+      </div>
+      
       <div class="stats-grid">
         <div class="stat-card"><p>Progresso do dia</p><h3 id="dayPct">0%</h3><div class="bar"><div class="bar-fill" id="dayBar"></div></div></div>
         <div class="stat-card"><p>Tarefas concluídas</p><h3><span id="tasksDone">0</span>/<span id="tasksTotal">0</span></h3></div>
@@ -783,6 +816,7 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="js/xp-system.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

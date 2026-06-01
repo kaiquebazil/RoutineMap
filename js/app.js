@@ -130,11 +130,10 @@ function updateDashboard() {
   const habitsTotalEl = document.getElementById('habitsTotal');
   if(habitsDoneEl) habitsDoneEl.textContent = habitsToday;
   if(habitsTotalEl) habitsTotalEl.textContent = habits.length;
-  let xp = tasksDone * 10 + focusData.sessions * 5 + words.length * 5 + phrases.length * 2;
-  const totalXpEl = document.getElementById('totalXp');
-  const xpDisplayEl = document.getElementById('xpDisplay');
-  if(totalXpEl) totalXpEl.textContent = xp;
-  if(xpDisplayEl) xpDisplayEl.textContent = xp;
+  // XP agora é gerenciado pelo sistema de XP centralizado
+  if (typeof updateXpDisplay === 'function') {
+    updateXpDisplay();
+  }
   const globalStreakEl = document.getElementById('globalStreak');
   const streakDaysEl = document.getElementById('streakDays');
   if(globalStreakEl) globalStreakEl.textContent = streak;
@@ -147,7 +146,14 @@ function renderTasks() {
   container.innerHTML = tasks.map((t, i) => `<li><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})"><span class="task-text ${t.completed ? 'completed' : ''}">${escapeHtml(t.text)}</span><button class="delete-item" onclick="deleteTask(${i})">🗑</button></li>`).join('');
   updateDashboard();
 }
-function toggleTask(i) { tasks[i].completed = !tasks[i].completed; saveAll(); renderTasks(); }
+function toggleTask(i) { 
+  tasks[i].completed = !tasks[i].completed; 
+  if (tasks[i].completed) {
+    addXp(XP_RULES.TASK_COMPLETE, 'task_complete', true);
+  }
+  saveAll(); 
+  renderTasks(); 
+}
 function deleteTask(i) { tasks.splice(i,1); saveAll(); renderTasks(); }
 const taskForm = document.getElementById('taskForm');
 if(taskForm) taskForm.addEventListener('submit', (e) => { e.preventDefault(); const input = document.getElementById('taskInput'); if(input && input.value.trim()){ tasks.push({text:input.value.trim(), completed:false}); saveAll(); renderTasks(); input.value=''; } });
@@ -161,7 +167,19 @@ function renderHabits() {
   container.innerHTML = habits.map((h, i) => `<div class="habit-card"><div class="habit-header"><span class="habit-name">${escapeHtml(h.name)}</span><span class="habit-streak">🔥 ${h.streak||0}</span><button class="btn-small btn-danger" onclick="deleteHabit(${i})">Excluir</button></div><div class="habit-week">${days.map((d,idx)=>`<div class="habit-day ${h.history && h.history[idx] ? 'completed' : ''} ${idx===todayIdx ? 'today' : ''}" onclick="toggleHabitDay(${i},${idx})">${d.substring(0,1)}</div>`).join('')}</div></div>`).join('');
   updateDashboard();
 }
-function toggleHabitDay(habitIdx, dayIdx) { if(!habits[habitIdx].history) habits[habitIdx].history = Array(7).fill(false); habits[habitIdx].history[dayIdx] = !habits[habitIdx].history[dayIdx]; habits[habitIdx].streak = habits[habitIdx].history.filter(Boolean).length; saveAll(); renderHabits(); }
+function toggleHabitDay(habitIdx, dayIdx) { 
+  if(!habits[habitIdx].history) habits[habitIdx].history = Array(7).fill(false); 
+  const wasCompleted = habits[habitIdx].history[dayIdx];
+  habits[habitIdx].history[dayIdx] = !habits[habitIdx].history[dayIdx]; 
+  habits[habitIdx].streak = habits[habitIdx].history.filter(Boolean).length; 
+  
+  if (!wasCompleted && habits[habitIdx].history[dayIdx]) {
+    addXp(XP_RULES.HABIT_DAY_COMPLETE, 'habit_day', true);
+  }
+  
+  saveAll(); 
+  renderHabits(); 
+}
 function deleteHabit(i) { habits.splice(i,1); saveAll(); renderHabits(); }
 const habitForm = document.getElementById('habitForm');
 if(habitForm) habitForm.addEventListener('submit', (e) => { e.preventDefault(); const input = document.getElementById('habitName'); if(input && input.value.trim()){ habits.push({name:input.value.trim(), history:Array(7).fill(false), streak:0}); saveAll(); renderHabits(); input.value=''; } });
@@ -172,7 +190,20 @@ function renderGoals() {
   if(!container) return;
   container.innerHTML = goals.map((g, i) => `<div class="goal-item"><div class="goal-header"><span class="goal-name">${escapeHtml(g.name)}</span><span class="goal-deadline">📅 ${g.deadline}</span><button class="btn-small btn-danger" onclick="deleteGoal(${i})">Excluir</button></div><div class="goal-progress"><span>Progresso: ${g.progress || 0}/${g.target}</span><div class="course-progress-bar" style="margin-top:6px"><div class="course-progress-fill" style="width:${((g.progress||0)/g.target)*100}%"></div></div><button class="btn-small" onclick="incrementGoal(${i})">+1</button></div></div>`).join('');
 }
-function incrementGoal(i) { goals[i].progress = (goals[i].progress || 0) + 1; if(goals[i].progress > goals[i].target) goals[i].progress = goals[i].target; saveAll(); renderGoals(); }
+function incrementGoal(i) { 
+  goals[i].progress = (goals[i].progress || 0) + 1; 
+  if(goals[i].progress > goals[i].target) goals[i].progress = goals[i].target; 
+  
+  // Adicionar XP
+  if (goals[i].progress === goals[i].target) {
+    addXp(XP_RULES.GOAL_COMPLETE, 'goal_complete', true);
+  } else {
+    addXp(XP_RULES.GOAL_INCREMENT, 'goal_increment', true);
+  }
+  
+  saveAll(); 
+  renderGoals(); 
+}
 function deleteGoal(i) { goals.splice(i,1); saveAll(); renderGoals(); }
 const goalForm = document.getElementById('goalForm');
 if(goalForm) goalForm.addEventListener('submit', (e) => { e.preventDefault(); const name = document.getElementById('goalName'); const deadline = document.getElementById('goalDeadline'); const target = document.getElementById('goalTarget'); if(name && deadline && target && name.value.trim() && deadline.value && target.value){ goals.push({name:name.value.trim(), deadline:deadline.value, target:parseInt(target.value), progress:0}); saveAll(); renderGoals(); name.value = ''; deadline.value = ''; target.value = ''; } });
@@ -754,6 +785,7 @@ function saveRoleplayItem() {
     }
   } else {
     fullRoleplays[currentEditArea].push(roleplayData);
+    addXp(XP_RULES.ROLEPLAY_CREATE, 'roleplay_create', true);
   }
   
   saveFullRoleplays();
@@ -836,7 +868,7 @@ initFullRoleplays();
 
 // ==================== FOCO ====================
 function updateTimerDisplay() { let mins = Math.floor(timerSeconds/60); let secs = timerSeconds%60; const timerDisplay = document.getElementById('timerDisplay'); if(timerDisplay) timerDisplay.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`; let circumference = 565.48; let offset = circumference - (timerSeconds/(timerMode==='focus'?1500:300))*circumference; const ringFg = document.getElementById('ringFg'); if(ringFg) ringFg.style.strokeDashoffset = offset; }
-function startTimer() { if(timerInterval) clearInterval(timerInterval); timerActive=true; timerInterval = setInterval(()=>{ if(timerSeconds<=0){ clearInterval(timerInterval); timerActive=false; showToast('⏰ Tempo finalizado!'); focusData.sessions++; focusData.today += timerMode==='focus'?25:5; saveAll(); updateDashboard(); } else { timerSeconds--; updateTimerDisplay(); } },1000); }
+function startTimer() { if(timerInterval) clearInterval(timerInterval); timerActive=true; timerInterval = setInterval(()=>{ if(timerSeconds<=0){ clearInterval(timerInterval); timerActive=false; showToast('⏰ Tempo finalizado!'); focusData.sessions++; focusData.today += timerMode==='focus'?25:5; if(timerMode==='focus') { addXp(XP_RULES.FOCUS_SESSION, 'focus_session', true); } saveAll(); updateDashboard(); } else { timerSeconds--; updateTimerDisplay(); } },1000); }
 function pauseTimer() { if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerActive=false; } }
 function resetTimer() { pauseTimer(); timerSeconds = timerMode==='focus'?25*60:5*60; updateTimerDisplay(); }
 const startTimerBtn = document.getElementById('startTimer');
@@ -870,7 +902,16 @@ function renderChecklist() {
   if(checklistPercent) checklistPercent.textContent = pct+'%';
   if(checklistProgress) checklistProgress.style.width = pct+'%';
 }
-function toggleChecklistItem(num) { if(checklistItems.includes(num)) checklistItems = checklistItems.filter(n=>n!==num); else checklistItems.push(num); localStorage.setItem('checklistItems', JSON.stringify(checklistItems)); renderChecklist(); }
+function toggleChecklistItem(num) { 
+  if(checklistItems.includes(num)) {
+    checklistItems = checklistItems.filter(n=>n!==num);
+  } else {
+    checklistItems.push(num);
+    addXp(XP_RULES.CHECKLIST_VIDEO_MARK, 'checklist_video', true);
+  }
+  localStorage.setItem('checklistItems', JSON.stringify(checklistItems)); 
+  renderChecklist(); 
+}
 const checkAllBtn = document.getElementById('checkAllBtn');
 const uncheckAllBtn = document.getElementById('uncheckAllBtn');
 const showCheckedBtn = document.getElementById('showCheckedBtn');
@@ -990,7 +1031,16 @@ if(wordForm) wordForm.addEventListener('submit', (e) => {
   let en = document.getElementById('wordEn').value.trim();
   let pt = document.getElementById('wordPt').value.trim();
   let example = document.getElementById('wordExample').value.trim();
-  if(en && pt) { words.push({en, pt, example}); saveAll(); renderWords(); document.getElementById('wordEn').value = ''; document.getElementById('wordPt').value = ''; document.getElementById('wordExample').value = ''; showToast('Palavra adicionada!'); }
+  if(en && pt) { 
+    words.push({en, pt, example}); 
+    addXp(XP_RULES.WORD_ADD, 'word_add', true);
+    saveAll(); 
+    renderWords(); 
+    document.getElementById('wordEn').value = ''; 
+    document.getElementById('wordPt').value = ''; 
+    document.getElementById('wordExample').value = ''; 
+    showToast('Palavra adicionada!'); 
+  }
 });
 
 // ==================== REFERÊNCIAS ====================
@@ -1075,6 +1125,7 @@ function addSpeakingSession(event) {
   };
   
   speakingSessions.push(newSession);
+  addXp(XP_RULES.SPEAKING_SESSION_ADD, 'speaking_session', true);
   saveAll();
   renderSpeaking();
   
@@ -1184,7 +1235,15 @@ function renderDailyActivities() {
   const dailyNotesEl = document.getElementById('dailyNotes');
   if(dailyNotesEl) dailyNotesEl.value = dailyNotes;
 }
-function toggleDailyActivity(i) { dailyTasks[i] = !dailyTasks[i]; saveAll(); updateDashboard(); }
+function toggleDailyActivity(i) { 
+  const wasCompleted = dailyTasks[i];
+  dailyTasks[i] = !dailyTasks[i]; 
+  if (!wasCompleted && dailyTasks[i]) {
+    addXp(XP_RULES.DAILY_TASK_COMPLETE, 'daily_task', true);
+  }
+  saveAll(); 
+  updateDashboard(); 
+}
 const dailyNotesInput = document.getElementById('dailyNotes');
 if(dailyNotesInput) dailyNotesInput.addEventListener('input', (e) => { dailyNotes = e.target.value; localStorage.setItem('dailyNotes', dailyNotes); });
 
@@ -1422,6 +1481,7 @@ function toggleFavorite(phraseId) {
     favorites = favorites.filter(id => id !== phraseId);
   } else {
     favorites.push(phraseId);
+    addXp(XP_RULES.ENGLISH_PHRASE_FAVORITE, 'english_phrase_favorite', true);
   }
   saveEnglishData();
   renderEnglish();
@@ -1674,6 +1734,8 @@ function saveEnglishPhrase() {
     subcat: subcat || ''
   });
   
+  addXp(XP_RULES.ENGLISH_PHRASE_ADD, 'english_phrase', true);
+  
   saveEnglishData();
   renderEnglish();
   closeModal('newEnglishPhraseModal');
@@ -1768,6 +1830,13 @@ function setupDataButtons() {
 
 function init() {
   if(checklistItems.length === 0 && checklistTotal === 250) checklistItems = [];
+  
+  // Inicializar sistema de XP
+  if (typeof loadUserStats === 'function') {
+    loadUserStats();
+    updateXpDisplay();
+  }
+  
   updateStreak();
   renderTasks();
   renderSpeaking();
@@ -1789,8 +1858,10 @@ function init() {
   renderEnglish();
   initEnglishEventListeners();
   
-  // Configurar botões de dados (ADICIONAR ESTA LINHA)
+  // Configurar botões de dados
   setupDataButtons();
+  
+  console.log('Sistema de XP inicializado com sucesso!');
 }
 
 // Iniciar tudo
@@ -1825,7 +1896,9 @@ function getAllAppData() {
     categories: categories,
     englishPhrases: englishPhrases,
     favorites: favorites,
-    dailyPhraseId: dailyPhraseId
+    dailyPhraseId: dailyPhraseId,
+    // Dados do Sistema de XP
+    userStats: userStats
   };
 }
 
@@ -1891,6 +1964,12 @@ function importAllData(file) {
       }
       if (importedData.favorites) favorites = importedData.favorites;
       if (importedData.dailyPhraseId) dailyPhraseId = importedData.dailyPhraseId;
+      
+      // Dados do Sistema de XP
+      if (importedData.userStats) {
+        userStats = importedData.userStats;
+        saveUserStats();
+      }
       
       // Salvar tudo no localStorage
       saveAll();
