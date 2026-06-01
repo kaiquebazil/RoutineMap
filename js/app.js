@@ -1807,9 +1807,17 @@ function navigateTo(view) {
   const titleEl = document.getElementById('viewTitle');
   if(titleEl) titleEl.textContent = titles[view] || view;
 }
-document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => navigateTo(btn.dataset.view)));
+document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => {
+  navigateTo(btn.dataset.view);
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}));
 const menuBtn = document.getElementById('menuBtn');
-if(menuBtn) menuBtn.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+if(menuBtn) menuBtn.addEventListener('click', () => document.getElementById('sidebar').classList.add('open'));
+
+const closeSidebarBtn = document.getElementById('closeSidebar');
+if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => document.getElementById('sidebar').classList.remove('open'));
 const todayDateEl = document.getElementById('todayDate');
 if(todayDateEl) todayDateEl.textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 

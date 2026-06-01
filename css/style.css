@@ -1324,3 +1324,33 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Close button for mobile sidebar */
+.close-sidebar {
+  display: none;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text);
+  z-index: 101;
+  transition: all 0.2s;
+}
+
+.close-sidebar:hover {
+  background: var(--border);
+}
+
+@media (max-width: 768px) {
+  .close-sidebar {
+    display: flex;
+  }
+}
