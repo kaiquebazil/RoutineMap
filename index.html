@@ -620,6 +620,7 @@
             <button class="filter-btn" data-filter="favorites">⭐ Favoritas</button>
             <button class="filter-btn" data-filter="recent">🕒 Recentes</button>
             <button id="addEnglishPhraseTopBtn" class="btn-small" style="background: var(--green);">➕ Nova Frase</button>
+            <button id="addEnglishSubcatBtn" class="btn-small" style="background: var(--purple); color: white;">📂 Nova Subcategoria</button>
           </div>
           <div class="view-toggle">
             <button class="view-toggle-btn active" data-view="grid">🔲 Grid</button>
@@ -794,6 +795,22 @@
     <div class="modal-actions">
       <button onclick="closeModal('referenceModal')" class="btn-ghost">Cancelar</button>
       <button onclick="saveReference()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para adicionar subcategoria no English -->
+<div id="newEnglishSubcatModal" class="modal-overlay">
+  <div class="modal">
+    <h3>📂 Adicionar Subcategoria <button onclick="closeModal('newEnglishSubcatModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button></h3>
+    <input type="text" id="newSubcatName" placeholder="Nome da subcategoria" autocomplete="off">
+    <input type="text" id="newSubcatEmoji" placeholder="Emoji (ex: 📂)" autocomplete="off">
+    <select id="newSubcatParentCat">
+      <option value="">-- Selecione a categoria pai --</option>
+    </select>
+    <div class="modal-actions">
+      <button onclick="closeModal('newEnglishSubcatModal')" class="btn-ghost">Cancelar</button>
+      <button id="saveEnglishSubcatBtn">Salvar</button>
     </div>
   </div>
 </div>

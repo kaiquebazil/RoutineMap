@@ -1583,9 +1583,10 @@ function renderEnglish() {
         const isSubOpen = openEnglishSubcats.has(subcat.id);
         
         html += `<div class="subcategory-group">
-          <div class="subcategory-header" onclick="event.stopPropagation(); toggleEnglishSubcat('${subcat.id}')">
-            <div class="subcategory-title"><span class="collapse-icon ${isSubOpen ? '' : 'collapsed'}">▼</span><span>${subcat.emoji || '📂'}</span><span>${escapeHtml(subcat.name)}</span><span class="count">${subcatPhrases.length}</span></div>
-          </div>
+	          <div class="subcategory-header" onclick="event.stopPropagation(); toggleEnglishSubcat('${subcat.id}')">
+	            <div class="subcategory-title"><span class="collapse-icon ${isSubOpen ? '' : 'collapsed'}">▼</span><span>${subcat.emoji || '📂'}</span><span>${escapeHtml(subcat.name)}</span><span class="count">${subcatPhrases.length}</span></div>
+              <button class="btn-small btn-danger" onclick="event.stopPropagation(); deleteEnglishSubcat('${cat.id}', '${subcat.id}')" style="padding: 2px 8px; font-size: 0.7rem;">🗑️ Apagar</button>
+	          </div>
           <div class="subcategory-phrases" style="display: ${isSubOpen ? 'block' : 'none'}">`;
         
         if (currentViewMode === 'grid') {
@@ -1787,11 +1788,84 @@ function initEnglishEventListeners() {
     catSelect.addEventListener('change', function() {
       const cat = categories.find(c => c.id === this.value);
       const subcatSelect = document.getElementById('newPhraseSubcat');
-      if (subcatSelect && cat && cat.subcats) {
-        subcatSelect.innerHTML = '<option value="">-- Sem subcategoria --</option>' + 
-          cat.subcats.map(s => `<option value="${s.id}">${s.emoji} ${escapeHtml(s.name)}</option>`).join('');
+      if (subcatSelect) {
+        if (cat && cat.subcats) {
+          subcatSelect.innerHTML = '<option value="">-- Sem subcategoria --</option>' + 
+            cat.subcats.map(s => `<option value="${s.id}">${s.emoji} ${escapeHtml(s.name)}</option>`).join('');
+        } else {
+          subcatSelect.innerHTML = '<option value="">-- Sem subcategoria --</option>';
+        }
       }
     });
+  }
+}
+
+function initSubcatEventListeners() {
+  const addSubcatBtn = document.getElementById('addEnglishSubcatBtn');
+  if (addSubcatBtn) addSubcatBtn.addEventListener('click', openAddEnglishSubcat);
+  
+  const saveSubcatBtn = document.getElementById('saveEnglishSubcatBtn');
+  if (saveSubcatBtn) saveSubcatBtn.addEventListener('click', saveEnglishSubcat);
+}
+
+function openAddEnglishSubcat() {
+  const catSelect = document.getElementById('newSubcatParentCat');
+  if (catSelect) {
+    catSelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.emoji} ${escapeHtml(c.name)}</option>`).join('');
+  }
+  const modal = document.getElementById('newEnglishSubcatModal');
+  if(modal) modal.classList.add('open');
+}
+
+function saveEnglishSubcat() {
+  const name = document.getElementById('newSubcatName').value.trim();
+  const emoji = document.getElementById('newSubcatEmoji').value.trim() || '📂';
+  const parentCatId = document.getElementById('newSubcatParentCat').value;
+  
+  if (!name || !parentCatId) {
+    showToast('⚠️ Preencha o nome e selecione a categoria pai');
+    return;
+  }
+  
+  const parentCat = categories.find(c => c.id === parentCatId);
+  if (parentCat) {
+    if (!parentCat.subcats) parentCat.subcats = [];
+    
+    const subcatId = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+    parentCat.subcats.push({
+      id: subcatId,
+      name: name,
+      emoji: emoji
+    });
+    
+    saveEnglishData();
+    renderEnglish();
+    closeModal('newEnglishSubcatModal');
+    
+    document.getElementById('newSubcatName').value = '';
+    document.getElementById('newSubcatEmoji').value = '';
+    
+    showToast('✅ Subcategoria adicionada!');
+  }
+}
+
+function deleteEnglishSubcat(catId, subcatId) {
+  if (confirm('Tem certeza que deseja excluir esta subcategoria? As frases vinculadas ficarão sem subcategoria.')) {
+    const cat = categories.find(c => c.id === catId);
+    if (cat && cat.subcats) {
+      cat.subcats = cat.subcats.filter(s => s.id !== subcatId);
+      
+      // Limpar subcat das frases
+      englishPhrases.forEach(p => {
+        if (p.cat === catId && p.subcat === subcatId) {
+          delete p.subcat;
+        }
+      });
+      
+      saveEnglishData();
+      renderEnglish();
+      showToast('🗑️ Subcategoria excluída!');
+    }
   }
 }
 
@@ -1885,6 +1959,7 @@ function init() {
   loadEnglishData();
   renderEnglish();
   initEnglishEventListeners();
+  initSubcatEventListeners();
   
   // Configurar botões de dados
   setupDataButtons();
