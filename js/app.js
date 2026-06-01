@@ -1527,6 +1527,19 @@ function updateEnglishStats() {
   if (favSpan) favSpan.textContent = favorites.length;
 }
 
+function deleteEnglishPhrase(phraseId) {
+  if (confirm('Tem certeza que deseja excluir esta frase?')) {
+    englishPhrases = englishPhrases.filter(p => p.id !== phraseId);
+    favorites = favorites.filter(id => id !== phraseId);
+    if (dailyPhraseId === phraseId) {
+      dailyPhraseId = englishPhrases.length > 0 ? englishPhrases[0].id : null;
+    }
+    saveEnglishData();
+    renderEnglish();
+    showToast('🗑️ Frase excluída!');
+  }
+}
+
 function renderEnglish() {
   const container = document.getElementById('englishCategoriesContainer');
   if (!container) return;
@@ -1583,7 +1596,10 @@ function renderEnglish() {
               <button class="fav-star ${isFav ? 'favorited' : ''}" onclick="toggleFavorite(${p.id})">${isFav ? '★' : '☆'}</button>
               <div class="phrase-en-text">${escapeHtml(p.en)}</div>
               <div class="phrase-pt-text">${escapeHtml(p.pt)}</div>
-              <div class="phrase-card-actions"><button class="phrase-btn speak" onclick="speakEnglishPhrase('${escapeHtml(p.en).replace(/'/g, "\\'")}')">🔊 Ouvir</button></div>
+              <div class="phrase-card-actions">
+                  <button class="phrase-btn speak" onclick="speakEnglishPhrase('${escapeHtml(p.en).replace(/'/g, "\\'")}')">🔊 Ouvir</button>
+                  <button class="phrase-btn delete" onclick="deleteEnglishPhrase(${p.id})" style="background: var(--red-soft); color: var(--red); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">🗑️</button>
+                </div>
             </div>`;
           }
           html += '</div>';
@@ -1596,6 +1612,7 @@ function renderEnglish() {
               <div class="list-actions">
                 <button class="phrase-btn speak" onclick="speakEnglishPhrase('${escapeHtml(p.en).replace(/'/g, "\\'")}')">🔊</button>
                 <button class="phrase-btn favorite ${isFav ? 'favorited' : ''}" onclick="toggleFavorite(${p.id})">${isFav ? '★' : '☆'}</button>
+                <button class="phrase-btn delete" onclick="deleteEnglishPhrase(${p.id})" style="background: var(--red-soft); color: var(--red); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">🗑️</button>
               </div>
             </div>`;
           }
@@ -1619,7 +1636,10 @@ function renderEnglish() {
             <button class="fav-star ${isFav ? 'favorited' : ''}" onclick="toggleFavorite(${p.id})">${isFav ? '★' : '☆'}</button>
             <div class="phrase-en-text">${escapeHtml(p.en)}</div>
             <div class="phrase-pt-text">${escapeHtml(p.pt)}</div>
-            <div class="phrase-card-actions"><button class="phrase-btn speak" onclick="speakEnglishPhrase('${escapeHtml(p.en).replace(/'/g, "\\'")}')">🔊 Ouvir</button></div>
+            <div class="phrase-card-actions">
+                  <button class="phrase-btn speak" onclick="speakEnglishPhrase('${escapeHtml(p.en).replace(/'/g, "\\'")}')">🔊 Ouvir</button>
+                  <button class="phrase-btn delete" onclick="deleteEnglishPhrase(${p.id})" style="background: var(--red-soft); color: var(--red); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">🗑️</button>
+                </div>
           </div>`;
         }
         html += '</div>';
