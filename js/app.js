@@ -60,8 +60,7 @@ let checklistNotes = localStorage.getItem('checklistNotes') || '';
 let phrases = JSON.parse(localStorage.getItem('phrases') || '[]');
 let roleplays = JSON.parse(localStorage.getItem('roleplays') || JSON.stringify({living:[], want:[], will:[]}));
 let words = JSON.parse(localStorage.getItem('words') || '[]');
-let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks') || '[]');
-let dailyNotes = localStorage.getItem('dailyNotes') || '';
+
 let speakingSessions = JSON.parse(localStorage.getItem('speakingSessions') || '[]');
 let streak = parseInt(localStorage.getItem('streak') || '0');
 let lastDate = localStorage.getItem('lastDate') || '';
@@ -99,8 +98,7 @@ function saveAll() {
   localStorage.setItem('phrases', JSON.stringify(phrases));
   localStorage.setItem('roleplays', JSON.stringify(roleplays));
   localStorage.setItem('words', JSON.stringify(words));
-  localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
-  localStorage.setItem('dailyNotes', dailyNotes);
+
   localStorage.setItem('references', JSON.stringify(references));
   localStorage.setItem('energyData', JSON.stringify(energyData));
   updateDashboard();
@@ -1211,41 +1209,7 @@ function deleteSpeakingSession(index) {
   }
 }
 
-// ==================== ATIVIDADES DIÁRIAS ====================
-function renderDailyActivities() {
-  const container = document.getElementById('dailyActivitiesList');
-  if(!container) return;
-  const defaultActivities = [
-    "📹 Assistir 30 minutos dos vídeos em inglês filtrando e guardando conteúdo (Sam antes do trabalho)",
-    "📚 Estudar meus vídeos",
-    "💬 Conversar com pessoas em inglês",
-    "🎧 Escutar vídeos ou Radio Garden indo para o trabalho e em tempo livre",
-    "🎭 Roleplay"
-  ];
-  if(dailyTasks.length === 0) dailyTasks = defaultActivities.map(() => false);
-  if(dailyTasks.length < defaultActivities.length) {
-    while(dailyTasks.length < defaultActivities.length) dailyTasks.push(false);
-  }
-  container.innerHTML = defaultActivities.map((act, i) => `
-    <div class="daily-activity">
-      <input type="checkbox" id="dailyAct${i}" ${dailyTasks[i] ? 'checked' : ''} onchange="toggleDailyActivity(${i})">
-      <label for="dailyAct${i}">${escapeHtml(act)}</label>
-    </div>
-  `).join('');
-  const dailyNotesEl = document.getElementById('dailyNotes');
-  if(dailyNotesEl) dailyNotesEl.value = dailyNotes;
-}
-function toggleDailyActivity(i) { 
-  const wasCompleted = dailyTasks[i];
-  dailyTasks[i] = !dailyTasks[i]; 
-  if (!wasCompleted && dailyTasks[i]) {
-    addXp(XP_RULES.DAILY_TASK_COMPLETE, 'daily_task', true);
-  }
-  saveAll(); 
-  updateDashboard(); 
-}
-const dailyNotesInput = document.getElementById('dailyNotes');
-if(dailyNotesInput) dailyNotesInput.addEventListener('input', (e) => { dailyNotes = e.target.value; localStorage.setItem('dailyNotes', dailyNotes); });
+
 
 // ==================== STREAK ====================
 function updateStreak() {
@@ -1950,7 +1914,7 @@ function init() {
   renderWords();
   renderReferences();
   renderEnergyTracker();
-  renderDailyActivities();
+
   updateDashboard();
   resetTimer();
   updateTimerDisplay();
@@ -1988,8 +1952,7 @@ function getAllAppData() {
     roleplays: roleplays,
     fullRoleplays: fullRoleplays,
     words: words,
-    dailyTasks: dailyTasks,
-    dailyNotes: dailyNotes,
+
     speakingSessions: speakingSessions,
     streak: streak,
     lastDate: lastDate,
@@ -2051,8 +2014,7 @@ function importAllData(file) {
         saveFullRoleplays();
       }
       if (importedData.words) words = importedData.words;
-      if (importedData.dailyTasks) dailyTasks = importedData.dailyTasks;
-      if (importedData.dailyNotes) dailyNotes = importedData.dailyNotes;
+
       if (importedData.speakingSessions) speakingSessions = importedData.speakingSessions;
       if (importedData.streak) streak = importedData.streak;
       if (importedData.lastDate) lastDate = importedData.lastDate;
@@ -2091,7 +2053,7 @@ function importAllData(file) {
       renderSpeaking();
       renderReferences();
       renderEnergyTracker();
-      renderDailyActivities();
+    
       renderEnglish();
       updateDashboard();
       updateEnglishStats();

@@ -21,7 +21,7 @@ Atualmente o XP é apenas um número acumulado. Vamos implementar níveis:
 | **Roleplays** | Criar novo roleplay | 30 XP | `saveRoleplayItem` |
 | **Palavras** | Adicionar nova palavra | 3 XP | `addWord` |
 | **Checklist** | Marcar vídeo assistido | 10 XP | `toggleChecklistItem` |
-| **Atividades Diárias** | Completar atividade | 5 XP | `toggleDailyTask` |
+
 
 ## 3. Feedback Visual
 - **Notificação (Toast)**: "Você ganhou +10 XP!"
