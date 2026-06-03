@@ -33,7 +33,7 @@
       <button class="nav-item" data-view="roleplay"><span class="emoji">🎭</span> Roleplays</button>
       <button class="nav-item" data-view="words"><span class="emoji">📖</span> Palavras</button>
       <button class="nav-item" data-view="references"><span class="emoji">🔗</span> Referências</button>
-      <button class="nav-item" data-view="daily"><span class="emoji">⭐</span> Atividades Diárias</button>
+
     </nav>
     <div class="sidebar-footer">
   <!-- Barra de Progresso de XP -->
@@ -295,33 +295,7 @@
     </section>
 
 
-    <!-- ATIVIDADES DIÁRIAS -->
-    <section class="view" id="view-daily">
-      <div class="panel">
-        <div class="panel-header">
-          <h3>⭐ Atividades Diárias</h3>
-          <button class="btn-small" onclick="openAddDailyActivity()">➕ Nova Atividade</button>
-        </div>
-        <div id="dailyActivitiesList" class="daily-activities-list"></div>
-      </div>
-      <div class="panel" style="margin-top: 24px;">
-        <div class="panel-header"><h3>✏️ Anotações do dia</h3></div>
-        <textarea id="dailyNotes" rows="4" style="width:100%;padding:16px;border:none;font-family:inherit" placeholder="Escreva suas anotações aqui..."></textarea>
-      </div>
-    </section>
   </main>
-</div>
-
-<!-- Modal para adicionar Atividade Diária -->
-<div id="dailyActivityModal" class="modal-overlay">
-  <div class="modal">
-    <h3>⭐ Nova Atividade <button onclick="closeModal('dailyActivityModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button></h3>
-    <input type="text" id="newDailyActivityName" placeholder="Ex: Estudar 30 min de Listening" autocomplete="off">
-    <div class="modal-actions">
-      <button onclick="closeModal('dailyActivityModal')" class="btn-ghost">Cancelar</button>
-      <button onclick="addDailyActivity()">Salvar</button>
-    </div>
-  </div>
 </div>
 
 <!-- Modal para adicionar frase no English -->

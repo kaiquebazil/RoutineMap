@@ -60,8 +60,7 @@ let checklistNotes = localStorage.getItem('checklistNotes') || '';
 let phrases = JSON.parse(localStorage.getItem('phrases') || '[]');
 let roleplays = JSON.parse(localStorage.getItem('roleplays') || JSON.stringify({living:[], want:[], will:[]}));
 let words = JSON.parse(localStorage.getItem('words') || '[]');
-let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks') || '[]');
-let dailyNotes = localStorage.getItem('dailyNotes') || '';
+
 let speakingSessions = JSON.parse(localStorage.getItem('speakingSessions') || '[]');
 let streak = parseInt(localStorage.getItem('streak') || '0');
 let lastDate = localStorage.getItem('lastDate') || '';
@@ -99,8 +98,7 @@ function saveAll() {
   localStorage.setItem('phrases', JSON.stringify(phrases));
   localStorage.setItem('roleplays', JSON.stringify(roleplays));
   localStorage.setItem('words', JSON.stringify(words));
-  localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
-  localStorage.setItem('dailyNotes', dailyNotes);
+
   localStorage.setItem('references', JSON.stringify(references));
   localStorage.setItem('energyData', JSON.stringify(energyData));
   updateDashboard();
@@ -1213,86 +1211,6 @@ function deleteSpeakingSession(index) {
 
 
 
-// ==================== ATIVIDADES DIÁRIAS ====================
-function renderDailyActivities() {
-  const container = document.getElementById('dailyActivitiesList');
-  if(!container) return;
-  
-  if(dailyTasks.length === 0) {
-    container.innerHTML = `<div class="empty-state"><p>Nenhuma atividade cadastrada.</p></div>`;
-  } else {
-    container.innerHTML = dailyTasks.map((task, i) => `
-      <div class="daily-activity">
-        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-          <input type="checkbox" id="dailyAct${i}" ${task.completed ? 'checked' : ''} onchange="toggleDailyActivity(${i})">
-          <label for="dailyAct${i}" style="${task.completed ? 'text-decoration: line-through; color: var(--text-dim);' : ''}">${escapeHtml(task.name)}</label>
-        </div>
-        <button class="btn-icon" onclick="deleteDailyActivity(${i})" style="color: var(--red); background: var(--red-soft); border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">🗑️</button>
-      </div>
-    `).join('');
-  }
-  
-  const dailyNotesEl = document.getElementById('dailyNotes');
-  if(dailyNotesEl) dailyNotesEl.value = dailyNotes;
-}
-
-function openAddDailyActivity() {
-  const modal = document.getElementById('dailyActivityModal');
-  if(modal) {
-    modal.classList.add('open');
-    document.getElementById('newDailyActivityName').focus();
-  }
-}
-
-function addDailyActivity() {
-  const nameInput = document.getElementById('newDailyActivityName');
-  const name = nameInput.value.trim();
-  
-  if(name) {
-    dailyTasks.push({ name: name, completed: false });
-    nameInput.value = '';
-    closeModal('dailyActivityModal');
-    saveAll();
-    renderDailyActivities();
-    showToast('✨ Atividade adicionada!');
-  }
-}
-
-function deleteDailyActivity(i) {
-  if(confirm('Deseja excluir esta atividade?')) {
-    dailyTasks.splice(i, 1);
-    saveAll();
-    renderDailyActivities();
-    showToast('🗑️ Atividade removida');
-  }
-}
-
-function toggleDailyActivity(i) { 
-  const wasCompleted = dailyTasks[i].completed;
-  dailyTasks[i].completed = !dailyTasks[i].completed; 
-  
-  if (!wasCompleted && dailyTasks[i].completed) {
-    if (typeof addXp === 'function') {
-      addXp(XP_RULES.DAILY_TASK_COMPLETE || 5, 'daily_task', true);
-    }
-  }
-  
-  saveAll(); 
-  updateDashboard();
-  renderDailyActivities();
-}
-
-// Event listener para as notas
-document.addEventListener('DOMContentLoaded', () => {
-  const dailyNotesInput = document.getElementById('dailyNotes');
-  if(dailyNotesInput) {
-    dailyNotesInput.addEventListener('input', (e) => { 
-      dailyNotes = e.target.value; 
-      localStorage.setItem('dailyNotes', dailyNotes); 
-    });
-  }
-});
-
 // ==================== STREAK ====================
 function updateStreak() {
   let today = new Date().toDateString();
@@ -1996,7 +1914,7 @@ function init() {
   renderWords();
   renderReferences();
   renderEnergyTracker();
-  renderDailyActivities();
+
   updateDashboard();
   resetTimer();
   updateTimerDisplay();
@@ -2034,8 +1952,7 @@ function getAllAppData() {
     roleplays: roleplays,
     fullRoleplays: fullRoleplays,
     words: words,
-    dailyTasks: dailyTasks,
-    dailyNotes: dailyNotes,
+
     speakingSessions: speakingSessions,
     streak: streak,
     lastDate: lastDate,
@@ -2097,8 +2014,7 @@ function importAllData(file) {
         saveFullRoleplays();
       }
       if (importedData.words) words = importedData.words;
-      if (importedData.dailyTasks) dailyTasks = importedData.dailyTasks;
-      if (importedData.dailyNotes) dailyNotes = importedData.dailyNotes;
+
       if (importedData.speakingSessions) speakingSessions = importedData.speakingSessions;
       if (importedData.streak) streak = importedData.streak;
       if (importedData.lastDate) lastDate = importedData.lastDate;
