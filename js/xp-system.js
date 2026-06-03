@@ -42,7 +42,8 @@ const XP_RULES = {
   // Checklist de Vídeos
   CHECKLIST_VIDEO_MARK: 10,
   
-
+  // Atividades Diárias
+  DAILY_TASK_COMPLETE: 5,
   
   // Bônus
   STREAK_BONUS: 50 // A cada 7 dias de streak
@@ -253,7 +254,7 @@ function showXpNotification(amount, action) {
     'roleplay_create': '🎭 Roleplay criado',
     'word_add': '📖 Palavra adicionada',
     'checklist_video': '📹 Vídeo marcado',
-
+    'daily_task': '⭐ Atividade diária',
     'streak_bonus': '🔥 Bônus de streak'
   };
   
